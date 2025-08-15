@@ -683,9 +683,13 @@ TTNK:
 	Armament:
 		Weapon: TTankZap
 		LocalOffset: 0,0,213
-	AttackTurreted:
-	Turreted:
-	WithIdleOverlay@SPINNER:
+	AttackCharges:
+		ChargeLevel: 25
+		ChargeRate: 2
+		DischargeRate: 1
+		ChargingCondition: charging
+	WithIdleOverlay@CHARGING:
+		RequiresCondition: charging
 		Sequence: spinner
 	ProducibleWithLevel:
 		Prerequisites: vehicles.upgraded

@@ -14,7 +14,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits
 {
 	[Desc("Actor must charge up its armaments before firing.")]
-	public class AttackChargesInfo : AttackOmniInfo
+	public class AttackChargesInfo : AttackFollowInfo
 	{
 		[Desc("Amount of charge required to attack.")]
 		public readonly int ChargeLevel = 25;
@@ -32,7 +32,7 @@ namespace OpenRA.Mods.Common.Traits
 		public override object Create(ActorInitializer init) { return new AttackCharges(init.Self, this); }
 	}
 
-	public class AttackCharges : AttackOmni, INotifyAttack, INotifySold
+	public class AttackCharges : AttackFollow, INotifyAttack, INotifySold
 	{
 		readonly AttackChargesInfo info;
 		int chargingToken = Actor.InvalidConditionToken;
@@ -49,7 +49,7 @@ namespace OpenRA.Mods.Common.Traits
 		protected override void Tick(Actor self)
 		{
 			// Stop charging when we lose our target
-			charging &= self.CurrentActivity is SetTarget;
+			charging &= RequestedTarget.IsValidFor(self) || OpportunityTarget.IsValidFor(self);
 
 			var delta = charging ? info.ChargeRate : -info.DischargeRate;
 			ChargeLevel = (ChargeLevel + delta).Clamp(0, info.ChargeLevel);
@@ -65,7 +65,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		protected override bool CanAttack(Actor self, in Target target)
 		{
-			charging = base.CanAttack(self, target) && IsReachableTarget(target, true);
+			charging = base.CanAttack(self, target);
 			return ChargeLevel >= info.ChargeLevel && charging;
 		}
 
